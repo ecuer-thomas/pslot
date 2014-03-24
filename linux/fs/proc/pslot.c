@@ -16,9 +16,22 @@ static const struct file_operations proc_cpuinfo_operations = {
 	.release	= seq_release,
 };
 */
+
+struct proc_dir_entry	*proc_file_entry;
+
+static ssize_t pslot_read(struct file* f, char __user* u , size_t n, loff_t *o)
+{
+printk(KERN_INFO "You are trying to read something here");
+	return 0;
+}
+
+static const struct file_operations proc_pslot_operations = {
+	.read = pslot_read,
+};
+
 static int __init proc_pslot_init(void)
 {
-	//proc_create("cpuinfo", 0, NULL, &proc_cpuinfo_operations);
+	proc_create("pslot", 0, NULL, &proc_pslot_operations);
 	return 0;
 }
 module_init(proc_pslot_init);
