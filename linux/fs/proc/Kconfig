@@ -69,6 +69,6 @@ config PROC_PAGE_MONITOR
           interfaces will reduce the size of the kernel by approximately 4kb.
 
 config PROC_PSLOT
-	default n
+	default y
 	bool "/proc/pslot support"
 
