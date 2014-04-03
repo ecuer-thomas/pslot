@@ -1235,6 +1235,7 @@ enum perf_event_task_context {
 	perf_nr_task_contexts,
 };
 
+
 struct task_struct {
 	volatile long state;	/* -1 unrunnable, 0 runnable, >0 stopped */
 	void *stack;
@@ -2856,5 +2857,23 @@ static inline unsigned long rlimit_max(unsigned int limit)
 {
 	return task_rlimit_max(current, limit);
 }
+
+//#ifdef CONFIG_PSLOT
+
+/*
+ * Linked list for pslot functionalies.
+ * This list contains each task added in the CFS Scheduler (kernel/sched/fair.c)
+ * Only one process (allowed by sys_pslot syscalls) can read this list in user space.
+ * This list is cleaned when you read it by pslot procfs entry.
+ */
+
+struct pslot_linked_entity {
+	struct task_struct* task;
+	struct list_head list;
+};
+
+extern struct list_head  init_pslot_list;
+
+//#endif
 
 #endif
