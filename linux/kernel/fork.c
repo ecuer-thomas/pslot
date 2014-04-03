@@ -1471,10 +1471,11 @@ static struct task_struct *copy_process(unsigned long clone_flags,
 	perf_event_fork(p);
 
 	trace_task_newtask(p, clone_flags);
-
+//ifdef CONFIG_PSLOT
 	struct pslot_linked_entity *nn = kmalloc(sizeof(struct pslot_linked_entity), GFP_ATOMIC);
 	nn->task = p;
 	list_add(&nn->list, &init_pslot_list);
+	//#endif
 	return p;
 
 bad_fork_free_pid:

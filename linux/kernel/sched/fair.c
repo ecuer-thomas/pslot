@@ -35,21 +35,8 @@
 #include "sched.h"
 
 //#ifdef CONFIG_PSLOT
-//
-
 LIST_HEAD(init_pslot_list);
-
-/*
-struct pslot_linked_entity init_pslot_list = {
-	//.task = NULL,
-	//.list = LIST_HEAD_INIT(init_pslot_list.list)
-};
-
-//LIST_HEAD(init_pslot_linked_list);
-struct list_head init_pslot_linked_list = LIST_HEAD_INIT
-*/
 //#endif
-//
 
 /*
  * Targeted preemption latency for CPU-bound tasks:

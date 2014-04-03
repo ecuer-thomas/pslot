@@ -29,16 +29,6 @@ static int __init proc_pslot_init(void)
 {
 	struct proc_dir_entry *data = NULL;
 	proc_file_entry = proc_create("pslot", 0, NULL, &proc_pslot_operations);
-	printk(KERN_WARNING "tititoto proc %s\n", proc_file_entry->parent->name);
-
-	data = proc_root.parent;
-	for (; data != NULL; data = data->next)
-	{
-		printk(KERN_INFO "toto %s\n", data->name);
-		if (strcmp(data->name, "pslot") == 0)
-			printk(KERN_INFO "FIND IT\n");
-	}
-
 	return 0;
 }
 module_init(proc_pslot_init);
