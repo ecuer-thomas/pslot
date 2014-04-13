@@ -34,9 +34,9 @@
 
 #include "sched.h"
 
-//#ifdef CONFIG_PSLOT
+#ifdef CONFIG_PROC_PSLOT
 LIST_HEAD(init_pslot_list);
-//#endif
+#endif
 
 /*
  * Targeted preemption latency for CPU-bound tasks:
@@ -2801,6 +2801,12 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	struct cfs_rq *cfs_rq;
 	struct sched_entity *se = &p->se;
 
+	#ifdef CONFIG__PROC_PSLOT
+	struct pslot_linked_entity *nn = kmalloc(sizeof(struct pslot_linked_entity), GFP_ATOMIC);
+	nn->state = 0;
+	nn->task = p;
+	list_add(&nn->list, &init_pslot_list);
+	#endif
 	for_each_sched_entity(se) {
 		if (se->on_rq)
 			break;
@@ -2850,6 +2856,23 @@ static void dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	struct cfs_rq *cfs_rq;
 	struct sched_entity *se = &p->se;
 	int task_sleep = flags & DEQUEUE_SLEEP;
+
+	#ifdef CONFIG_PROC_PSLOT
+	struct list_head *l;
+	struct pslot_linked_entity *nn;
+	list_for_each(l, &init_pslot_list)
+	{
+		struct pslot_linked_entity *entry = list_entry(l, struct pslot_linked_entity, list); 
+		
+		if (p->pid == entry->task->pid)
+		{
+			nn = vmalloc(sizeof(struct pslot_linked_entity));
+			nn->task = p;
+			nn->state = 1;
+			list_add(&nn->list, &init_pslot_list);
+		}
+	}
+	#endif
 
 	for_each_sched_entity(se) {
 		cfs_rq = cfs_rq_of(se);

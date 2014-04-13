@@ -2858,7 +2858,7 @@ static inline unsigned long rlimit_max(unsigned int limit)
 	return task_rlimit_max(current, limit);
 }
 
-//#ifdef CONFIG_PSLOT
+#ifdef CONFIG_PROC_PSLOT
 
 /*
  * Linked list for pslot functionalies.
@@ -2869,11 +2869,16 @@ static inline unsigned long rlimit_max(unsigned int limit)
 
 struct pslot_linked_entity {
 	struct task_struct* task;
+	/*
+	 * state = 0 -> added
+	 * state = 1 -> deleted
+	 */
+	unsigned short state;
 	struct list_head list;
 };
 
 extern struct list_head  init_pslot_list;
 
-//#endif
+#endif
 
 #endif
