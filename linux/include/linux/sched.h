@@ -2874,10 +2874,22 @@ struct pslot_linked_entity {
 	 * state = 1 -> deleted
 	 */
 	unsigned short state;
+	unsigned short flags;
+	pid_t pid;
+	u64 old_sum_exec_runtime; 
+	u64 new_sum_exec_runtime;
+
 	struct list_head list;
 };
 
+#define PSLOT_STATE_STOP  0
+#define PSLOT_STATE_START 1
+
+#define PSLOT_FLAGS_NEW 0
+#define PSLOT_FLAGS_OLD 1
+
 extern struct list_head  init_pslot_list;
+extern short pslot_state;
 
 #endif
 

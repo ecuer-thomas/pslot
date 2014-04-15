@@ -6,19 +6,45 @@
 #include "internal.h"
 
 #include <linux/sched.h>
+#include <linux/uaccess.h>
 
 struct proc_dir_entry	*proc_file_entry;
 
 static ssize_t pslot_read(struct file* f, char __user* u , size_t n, loff_t *o)
 {
 	printk(KERN_INFO "Read some stuff here but no.\n");
-	struct list_head *l = NULL;
-	list_for_each(l, &init_pslot_list)
+	static struct list_head *l = NULL;
+	static struct list_head *q = NULL;
+	char *buffered = vmalloc(sizeof(char) + n);
+	char string[100];
+
+	int len = 0;
+	list_for_each_safe(l, q, &init_pslot_list)
 	{
 		struct pslot_linked_entity *entry = list_entry(l, struct pslot_linked_entity, list);
-		printk(KERN_INFO "Task = %d", entry->task->pid);
+		if (entry->flags == PSLOT_FLAGS_NEW)
+		{
+			int t = sprintf(string, "Task %d State %d", entry->pid,
+					entry->state);
+			printk(KERN_INFO "INFO %d %s", t, string);
+			if (len + t < n)
+			{
+				memcpy(buffered + len, string, t);	
+				len += t;
+				entry->flags = PSLOT_FLAGS_OLD;
+				/*list_del(l);
+				  kfree(entry);*/
+			}
+			else
+			{
+				copy_to_user(u, buffered, len);
+				return len;
+			}
+		}
 	}
-	return 0;
+	copy_to_user(u, buffered, len);
+	return len;
+	return len;
 }
 
 static const struct file_operations proc_pslot_operations = {

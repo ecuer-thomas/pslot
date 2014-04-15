@@ -36,6 +36,7 @@
 
 #ifdef CONFIG_PROC_PSLOT
 LIST_HEAD(init_pslot_list);
+short pslot_state = PSLOT_STATE_STOP;
 #endif
 
 /*
@@ -2801,11 +2802,20 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	struct cfs_rq *cfs_rq;
 	struct sched_entity *se = &p->se;
 
-	#ifdef CONFIG__PROC_PSLOT
-	struct pslot_linked_entity *nn = kmalloc(sizeof(struct pslot_linked_entity), GFP_ATOMIC);
-	nn->state = 0;
-	nn->task = p;
-	list_add(&nn->list, &init_pslot_list);
+	#ifdef CONFIG_PROC_PSLOT
+
+	if (pslot_state == PSLOT_STATE_START && se->sum_exec_runtime == 0)
+	{
+		struct pslot_linked_entity *nn = kmalloc(sizeof(struct pslot_linked_entity), GFP_ATOMIC);
+		nn->state = 0;
+		nn->task = p;
+		nn->pid = p->pid;
+		nn->flags = PSLOT_FLAGS_NEW;
+		nn->old_sum_exec_runtime = p->se.sum_exec_runtime;
+		INIT_LIST_HEAD(&nn->list);
+		list_add_tail(&nn->list, &init_pslot_list);
+	}
+
 	#endif
 	for_each_sched_entity(se) {
 		if (se->on_rq)
@@ -2858,18 +2868,28 @@ static void dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	int task_sleep = flags & DEQUEUE_SLEEP;
 
 	#ifdef CONFIG_PROC_PSLOT
-	struct list_head *l;
-	struct pslot_linked_entity *nn;
-	list_for_each(l, &init_pslot_list)
+	
+	if (pslot_state == PSLOT_STATE_START && p->state > 0)
 	{
-		struct pslot_linked_entity *entry = list_entry(l, struct pslot_linked_entity, list); 
-		
-		if (p->pid == entry->task->pid)
+		struct list_head *l;
+		struct pslot_linked_entity *nn;
+		list_for_each(l, &init_pslot_list)
 		{
-			nn = vmalloc(sizeof(struct pslot_linked_entity));
-			nn->task = p;
-			nn->state = 1;
-			list_add(&nn->list, &init_pslot_list);
+			struct pslot_linked_entity *entry = list_entry(l, struct pslot_linked_entity, list); 
+
+			if (p->pid == entry->pid)
+			{
+				/*nn = kmalloc(sizeof(struct pslot_linked_entity), GFP_ATOMIC);
+				  nn->task = p;
+				  nn->state = 1;
+				  INIT_LIST_HEAD(&nn->list);
+				  list_add_tail(&nn->list, &init_pslot_list);
+				  */
+				entry->state = 1;
+				entry->flags = PSLOT_FLAGS_NEW;
+				entry->new_sum_exec_runtime = p->se.sum_exec_runtime;
+				break;
+			}
 		}
 	}
 	#endif
