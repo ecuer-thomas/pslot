@@ -43,7 +43,7 @@ static ssize_t pslot_read(struct file* f, char __user* u , size_t n, loff_t *o)
 		}
 	}
 	copy_to_user(u, buffered, len);
-	return len;
+	vfree(buffered);
 	return len;
 }
 
