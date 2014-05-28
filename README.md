@@ -1,4 +1,4 @@
-Repositery:
+Repository Content:
 
 - *delivery* : Document for delivery
 - *pslot*    : Sources of ```pslot```
